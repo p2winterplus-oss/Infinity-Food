@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Infinity — อาหารแช่แข็ง</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --primary: #5B21B6; --primary-light: #7C3AED;
+      --ice: #0EA5E9; --bg: #F5F3FF; --card: #fff;
+      --text: #1E1B4B; --muted: #6B7280; --border: #E5E7EB;
+      --success: #059669; --danger: #DC2626; --r: 16px;
+    }
+    body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+    /* HEADER */
+    header { background: linear-gradient(135deg,#1E1B4B,#4C1D95,#0C4A6E); color:#fff; padding:0 20px; position:sticky; top:0; z-index:100; box-shadow:0 4px 24px rgba(0,0,0,.3); }
+    .hdr { max-width:1100px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; height:70px; }
+    .logo { display:flex; align-items:center; gap:12px; }
+    .logo-sym { font-size:32px; line-height:1; }
+    .logo h1 { font-size:22px; font-weight:800; letter-spacing:2px; }
+    .logo p { font-size:11px; opacity:.7; letter-spacing:1px; }
+    .cart-btn { background:rgba(255,255,255,.15); border:1px solid rgba(255,255,255,.3); color:#fff; padding:10px 20px; border-radius:50px; cursor:pointer; display:flex; align-items:center; gap:8px; font-size:15px; font-family:inherit; transition:all .2s; }
+    .cart-btn:hover { background:rgba(255,255,255,.25); }
+    .badge { background:#F59E0B; color:#1E1B4B; border-radius:50%; width:22px; height:22px; display:none; align-items:center; justify-content:center; font-size:12px; font-weight:700; }
+    .badge.on { display:flex; }
+
+    /* HERO */
+    .hero { background:linear-gradient(135deg,#4C1D95,#1D4ED8,#0EA5E9); color:#fff; text-align:center; padding:50px 20px 60px; }
+    .hero h2 { font-size:30px; font-weight:800; margin-bottom:8px; }
+    .hero p { font-size:16px; opacity:.85; }
+    .chips { display:flex; gap:10px; justify-content:center; margin-top:20px; flex-wrap:wrap; }
+    .chip { background:rgba(255,255,255,.15); border:1px solid rgba(255,255,255,.3); color:#fff; padding:6px 16px; border-radius:50px; font-size:13px; }
+
+    /* MAIN */
+    main { max-width:1100px; margin:0 auto; padding:30px 20px 140px; }
+    .cats { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:28px; }
+    .cat { padding:8px 18px; border-radius:50px; border:2px solid var(--border); background:#fff; color:var(--muted); cursor:pointer; font-size:14px; font-weight:500; transition:all .2s; font-family:inherit; }
+    .cat:hover { border-color:var(--primary-light); color:var(--primary-light); }
+    .cat.on { background:var(--primary); color:#fff; border-color:var(--primary); }
+
+    .sec-hdr { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; }
+    .day-badge { background:linear-gradient(90deg,#059669,#10B981); color:#fff; padding:6px 16px; border-radius:50px; font-size:13px; font-weight:600; }
+    .mcnt { color:var(--muted); font-size:14px; }
+
+    /* GRID */
+    .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:20px; }
+    .mcard { background:#fff; border-radius:var(--r); overflow:hidden; box-shadow:0 2px 12px rgba(0,0,0,.08); transition:all .25s; border:1px solid var(--border); }
+    .mcard:hover { transform:translateY(-4px); box-shadow:0 8px 28px rgba(91,33,182,.15); }
+    .mcard.off { opacity:.5; }
+    .cemoji { font-size:60px; text-align:center; padding:24px 16px 8px; background:linear-gradient(135deg,#F5F3FF,#EDE9FE); }
+    .cbody { padding:14px 16px 16px; }
+    .ccat { font-size:11px; color:var(--ice); font-weight:600; text-transform:uppercase; letter-spacing:1px; margin-bottom:4px; }
+    .cname { font-size:16px; font-weight:700; margin-bottom:6px; line-height:1.3; }
+    .cdesc { font-size:13px; color:var(--muted); margin-bottom:14px; line-height:1.5; min-height:38px; }
+    .cfoot { display:flex; align-items:center; justify-content:space-between; }
+    .cprice { font-size:20px; font-weight:800; color:var(--primary); }
+    .cprice span { font-size:13px; font-weight:400; color:var(--muted); }
+    .abtn { background:var(--primary); color:#fff; border:none; border-radius:50px; padding:8px 16px; cursor:pointer; font-size:13px; font-weight:600; transition:all .2s; font-family:inherit; }
+    .abtn:hover { background:var(--primary-light); transform:scale(1.05); }
+    .otag { font-size:12px; color:var(--danger); font-weight:600; }
+    .qctl { display:flex; align-items:center; gap:8px; }
+    .qbtn { width:28px; height:28px; border-radius:50%; border:2px solid var(--primary); background:#fff; color:var(--primary); cursor:pointer; font-size:16px; display:flex; align-items:center; justify-content:center; font-weight:700; transition:all .15s; font-family:inherit; }
+    .qbtn:hover { background:var(--primary); color:#fff; }
+    .qnum { font-weight:700; font-size:16px; min-width:20px; text-align:center; }
+
+    /* OVERLAY + CART */
+    .overlay { position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:200; display:none; }
+    .overlay.on { display:block; }
+    .cpanel { position:fixed; right:0; top:0; bottom:0; width:380px; max-width:100vw; background:#fff; z-index:300; transform:translateX(100%); transition:transform .3s ease; display:flex; flex-direction:column; box-shadow:-4px 0 40px rgba(0,0,0,.2); }
+    .cpanel.open { transform:translateX(0); }
+    .chdr { padding:20px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; background:linear-gradient(135deg,#1E1B4B,#4C1D95); color:#fff; }
+    .chdr h2 { font-size:18px; font-weight:700; }
+    .xbtn { background:none; border:none; color:#fff; font-size:24px; cursor:pointer; line-height:1; }
+    .cbody2 { flex:1; overflow-y:auto; padding:16px; }
+    .cempty { text-align:center; padding:60px 20px; color:var(--muted); font-size:15px; }
+    .citem { display:flex; gap:12px; align-items:center; padding:12px; border-radius:12px; margin-bottom:8px; background:var(--bg); border:1px solid var(--border); }
+    .ciem { font-size:28px; }
+    .cifo { flex:1; }
+    .cinm { font-size:14px; font-weight:600; margin-bottom:2px; }
+    .cipr { font-size:13px; color:var(--muted); }
+    .cictl { display:flex; align-items:center; gap:8px; }
+    .cqbtn { width:26px; height:26px; border-radius:50%; border:1.5px solid var(--primary); background:#fff; color:var(--primary); cursor:pointer; font-size:14px; display:flex; align-items:center; justify-content:center; font-weight:700; transition:all .15s; font-family:inherit; }
+    .cqbtn:hover { background:var(--primary); color:#fff; }
+    .ciqty { font-weight:700; font-size:15px; min-width:20px; text-align:center; }
+    .cisub { font-weight:700; font-size:14px; color:var(--primary); min-width:50px; text-align:right; }
+    .cftr { padding:16px; border-top:1px solid var(--border); }
+    .ctot { display:flex; justify-content:space-between; margin-bottom:16px; font-size:18px; font-weight:700; }
+    .ctot span:last-child { color:var(--primary); font-size:22px; }
+    .obtn { width:100%; padding:14px; border:none; border-radius:12px; background:linear-gradient(135deg,var(--primary),var(--ice)); color:#fff; font-size:16px; font-weight:700; cursor:pointer; font-family:inherit; transition:all .2s; }
+    .obtn:hover { transform:scale(1.02); }
+
+    /* MODAL */
+    .moverlay { position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:400; display:none; align-items:center; justify-content:center; padding:20px; }
+    .moverlay.on { display:flex; }
+    .mbox { background:#fff; border-radius:20px; width:100%; max-width:480px; overflow:hidden; box-shadow:0 20px 60px rgba(0,0,0,.3); max-height:90vh; overflow-y:auto; }
+    .mhd { padding:22px 24px; background:linear-gradient(135deg,#1E1B4B,#4C1D95); color:#fff; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; }
+    .mhd h2 { font-size:18px; font-weight:700; }
+    .mxbtn { background:none; border:none; color:#fff; font-size:24px; cursor:pointer; }
+    .mbody { padding:24px; }
+    .fg { margin-bottom:16px; }
+    .fl { display:block; font-size:13px; font-weight:600; margin-bottom:6px; }
+    .fi { width:100%; padding:11px 14px; border:2px solid var(--border); border-radius:10px; font-size:15px; font-family:inherit; transition:border-color .2s; color:var(--text); resize:vertical; }
+    .fi:focus { outline:none; border-color:var(--primary-light); }
+    .fi.err { border-color:var(--danger); }
+    .osum { background:var(--bg); border-radius:12px; padding:14px; margin-bottom:20px; border:1px solid var(--border); }
+    .osum h3 { font-size:14px; font-weight:700; margin-bottom:10px; color:var(--muted); }
+    .osi { display:flex; justify-content:space-between; font-size:13px; padding:3px 0; }
+    .ost { display:flex; justify-content:space-between; font-size:16px; font-weight:800; margin-top:10px; padding-top:10px; border-top:1px solid var(--border); color:var(--primary); }
+    .sbtn { width:100%; padding:14px; border:none; border-radius:12px; background:linear-gradient(135deg,var(--primary),var(--ice)); color:#fff; font-size:16px; font-weight:700; cursor:pointer; font-family:inherit; transition:all .2s; }
+    .sbtn:hover { transform:scale(1.02); }
+    .sbtn:disabled { background:#D1D5DB; cursor:not-allowed; transform:none; }
+
+    /* SUCCESS */
+    .sbox { text-align:center; padding:40px 24px; }
+    .sbox .sico { font-size:80px; display:block; margin-bottom:16px; }
+    .sbox h2 { font-size:24px; font-weight:800; color:var(--success); margin-bottom:8px; }
+    .sbox p { color:var(--muted); font-size:15px; margin-bottom:6px; }
+    .onum { font-size:28px; font-weight:900; color:var(--primary); margin:12px 0; }
+    .dbtn { margin-top:24px; padding:12px 32px; background:var(--primary); color:#fff; border:none; border-radius:50px; font-size:16px; font-weight:600; cursor:pointer; font-family:inherit; }
+
+    /* TOAST */
+    .toast { position:fixed; bottom:30px; left:50%; transform:translateX(-50%) translateY(80px); background:#1E1B4B; color:#fff; padding:12px 24px; border-radius:50px; font-size:14px; font-weight:600; z-index:999; transition:transform .3s ease; white-space:nowrap; }
+    .toast.on { transform:translateX(-50%) translateY(0); }
+
+    /* FLOAT */
+    .fcart { display:none; position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:linear-gradient(135deg,var(--primary),var(--ice)); color:#fff; padding:14px 28px; border-radius:50px; cursor:pointer; font-size:15px; font-weight:700; z-index:150; align-items:center; gap:10px; border:none; font-family:inherit; box-shadow:0 4px 20px rgba(91,33,182,.5); }
+
+    @media(max-width:640px){
+      .grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;}
+      .cemoji{font-size:44px;padding:16px 12px 6px;}
+      .hero h2{font-size:22px;}
+      .fcart{display:flex;}
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="hdr">
+    <div class="logo">
+      <div class="logo-sym">∞</div>
+      <div>
+        <h1>INFINITY</h1>
+        <p>FROZEN FOOD</p>
+      </div>
+    </div>
+    <button class="cart-btn" onclick="openCart()">
+      🛒 ตะกร้า <span class="badge" id="badge">0</span>
+    </button>
+  </div>
+</header>
+
+<div class="hero">
+  <h2>🍱 เมนูอาหารแช่แข็งประจำวัน</h2>
+  <p>พร้อมทานทุกมื้อ สะดวก อร่อย คุ้มค่า</p>
+  <div class="chips">
+    <span class="chip">❄️ แช่แข็งสด</span>
+    <span class="chip">🚀 ส่งรวดเร็ว</span>
+    <span class="chip">⭐ คุณภาพดี</span>
+    <span class="chip">💳 สั่งออนไลน์ได้</span>
+  </div>
+</div>
+
+<main>
+  <div class="cats" id="cats"></div>
+  <div class="sec-hdr">
+    <span class="day-badge" id="dayBadge">📅 วันนี้</span>
+    <span class="mcnt" id="mcnt"></span>
+  </div>
+  <div class="grid" id="grid"></div>
+</main>
+
+<button class="fcart" id="fcart" onclick="openCart()">🛒 ดูตะกร้า · <span id="ftot">฿0</span></button>
+<div class="overlay" id="overlay" onclick="closeCart()"></div>
+
+<!-- CART -->
+<div class="cpanel" id="cpanel">
+  <div class="chdr"><h2>🛒 ตะกร้าสินค้า</h2><button class="xbtn" onclick="closeCart()">✕</button></div>
+  <div class="cbody2" id="cbody"><div class="cempty">🛒<br><br>ยังไม่มีสินค้าในตะกร้า</div></div>
+  <div class="cftr" id="cftr" style="display:none">
+    <div class="ctot"><span>ยอดรวม</span><span id="ctot">฿0</span></div>
+    <button class="obtn" onclick="openOrder()">สั่งซื้อเลย →</button>
+  </div>
+</div>
+
+<!-- ORDER MODAL -->
+<div class="moverlay" id="omodal">
+  <div class="mbox">
+    <div class="mhd"><h2>📝 ข้อมูลการสั่งซื้อ</h2><button class="mxbtn" onclick="closeOrder()">✕</button></div>
+    <div class="mbody">
+      <div class="osum"><h3>รายการที่สั่ง</h3><div id="osumItems"></div>
+        <div class="ost"><span>ยอดรวมทั้งหมด</span><span id="osumTot">฿0</span></div></div>
+      <div class="fg"><label class="fl">ชื่อ-นามสกุล *</label><input class="fi" id="iname" placeholder="กรุณากรอกชื่อ-นามสกุล"></div>
+      <div class="fg"><label class="fl">เบอร์โทรศัพท์ *</label><input class="fi" id="iphone" placeholder="0812345678" maxlength="10" type="tel"></div>
+      <div class="fg"><label class="fl">ที่อยู่จัดส่ง</label><textarea class="fi" id="iaddr" rows="2" placeholder="ระบุที่อยู่จัดส่ง (ถ้ามี)"></textarea></div>
+      <div class="fg"><label class="fl">หมายเหตุ</label><textarea class="fi" id="inote" rows="2" placeholder="หมายเหตุเพิ่มเติม (ถ้ามี)"></textarea></div>
+      <button class="sbtn" id="sbtn" onclick="submitOrder()">✅ ยืนยันการสั่งซื้อ</button>
+    </div>
+  </div>
+</div>
+
+<!-- SUCCESS MODAL -->
+<div class="moverlay" id="smodal">
+  <div class="mbox">
+    <div class="sbox">
+      <span class="sico">🎉</span>
+      <h2>สั่งซื้อสำเร็จ!</h2>
+      <p>ขอบคุณที่ใช้บริการร้าน Infinity</p>
+      <div class="onum" id="sonumber">INF0001</div>
+      <p style="font-size:13px;color:#6B7280">กรุณาจดเลขออเดอร์ไว้เพื่อติดตามสถานะ</p>
+      <p style="margin-top:12px;font-size:14px">ทางร้านจะติดต่อกลับภายในไม่นาน 📞</p>
+      <button class="dbtn" onclick="closeSuc()">เสร็จสิ้น</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── DATA HELPERS ───────────────────────────────────────────
+const KEY_MENU   = 'infinity_menu';
+const KEY_ORDERS = 'infinity_orders';
+
+const DEFAULT_MENU = [
+  {id:1,name:'ข้าวผัดกะเพราไก่',category:'ข้าวผัด',price:45,description:'ข้าวผัดกะเพราไก่สูตรต้นตำรับ รสชาติกลมกล่อม',emoji:'🍚',available:true,updatedAt:new Date().toISOString()},
+  {id:2,name:'ข้าวมันไก่',category:'ข้าวมัน',price:50,description:'ข้าวมันไก่นุ่ม พร้อมน้ำจิ้มสูตรพิเศษ',emoji:'🍗',available:true,updatedAt:new Date().toISOString()},
+  {id:3,name:'ผัดไทยกุ้ง',category:'เส้น',price:55,description:'ผัดไทยกุ้งสด หอมอร่อยเส้นนุ่ม',emoji:'🍜',available:true,updatedAt:new Date().toISOString()},
+  {id:4,name:'ต้มยำกุ้ง',category:'ซุป',price:65,description:'ต้มยำกุ้งสูตรต้นตำรับ เผ็ดร้อนเต็มรส',emoji:'🍲',available:true,updatedAt:new Date().toISOString()},
+  {id:5,name:'แกงเขียวหวานไก่',category:'แกง',price:55,description:'แกงเขียวหวานไก่สูตรโบราณ หอมกะทิ',emoji:'🍛',available:true,updatedAt:new Date().toISOString()},
+  {id:6,name:'ข้าวผัดปู',category:'ข้าวผัด',price:70,description:'ข้าวผัดปูไข่เค็ม หอมมัน',emoji:'🦀',available:true,updatedAt:new Date().toISOString()},
+  {id:7,name:'บะหมี่หมูแดง',category:'เส้น',price:50,description:'บะหมี่หมูแดงน้ำแดง หวานกลมกล่อม',emoji:'🍝',available:true,updatedAt:new Date().toISOString()},
+];
+
+function getMenu()   { try { return JSON.parse(localStorage.getItem(KEY_MENU)) || null; } catch { return null; } }
+function getOrders() { try { return JSON.parse(localStorage.getItem(KEY_ORDERS)) || []; } catch { return []; } }
+function saveOrders(o){ localStorage.setItem(KEY_ORDERS, JSON.stringify(o)); }
+
+function initMenu() {
+  if (!getMenu()) localStorage.setItem(KEY_MENU, JSON.stringify(DEFAULT_MENU));
+}
+
+// ─── STATE ───────────────────────────────────────────────────
+let menu = [], cart = {}, currentCat = 'ทั้งหมด';
+
+function load() {
+  initMenu();
+  menu = getMenu();
+  renderCats(); renderGrid(); updateDate();
+}
+
+function updateDate() {
+  const d = new Date();
+  const days=['อาทิตย์','จันทร์','อังคาร','พุธ','พฤหัส','ศุกร์','เสาร์'];
+  const months=['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+  document.getElementById('dayBadge').textContent = `📅 วัน${days[d.getDay()]}ที่ ${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()+543}`;
+}
+
+function renderCats() {
+  const cats = ['ทั้งหมด',...new Set(menu.map(m=>m.category))];
+  document.getElementById('cats').innerHTML = cats.map(c=>
+    `<button class="cat${c===currentCat?' on':''}" onclick="filterCat('${c}')">${c}</button>`
+  ).join('');
+}
+
+function filterCat(c) { currentCat=c; renderCats(); renderGrid(); }
+
+function renderGrid() {
+  const f = currentCat==='ทั้งหมด' ? menu : menu.filter(m=>m.category===currentCat);
+  const s = [...f.filter(m=>m.available),...f.filter(m=>!m.available)];
+  document.getElementById('mcnt').textContent = `${f.filter(m=>m.available).length} รายการพร้อมขาย`;
+  if (!s.length) { document.getElementById('grid').innerHTML='<div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--muted)"><div style="font-size:64px">🍱</div><p style="margin-top:16px">ไม่มีเมนูในหมวดนี้</p></div>'; return; }
+  document.getElementById('grid').innerHTML = s.map(item=>{
+    const q = cart[item.id]||0;
+    const foot = !item.available
+      ? `<span class="otag">หมด / ไม่พร้อมขาย</span>`
+      : q===0
+        ? `<button class="abtn" onclick="addCart(${item.id})">+ เพิ่ม</button>`
+        : `<div class="qctl"><button class="qbtn" onclick="chgQty(${item.id},-1)">−</button><span class="qnum">${q}</span><button class="qbtn" onclick="chgQty(${item.id},1)">+</button></div>`;
+    return `<div class="mcard${!item.available?' off':''}">
+      <div class="cemoji">${item.emoji}</div>
+      <div class="cbody">
+        <div class="ccat">${item.category}</div>
+        <div class="cname">${item.name}</div>
+        <div class="cdesc">${item.description||''}</div>
+        <div class="cfoot">
+          <div class="cprice">฿${item.price.toLocaleString()} <span>/ถุง</span></div>
+          ${foot}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function addCart(id) { cart[id]=(cart[id]||0)+1; upd(); renderGrid(); toast('เพิ่มลงตะกร้าแล้ว 🛒'); }
+function chgQty(id,d) { cart[id]=(cart[id]||0)+d; if(cart[id]<=0) delete cart[id]; upd(); renderGrid(); renderCart(); }
+
+function getTotal() { return Object.entries(cart).reduce((s,[id,q])=>{const m=menu.find(m=>m.id===+id);return m?s+m.price*q:s;},0); }
+function getCount() { return Object.values(cart).reduce((s,q)=>s+q,0); }
+
+function upd() {
+  const n=getCount(),t=getTotal();
+  const b=document.getElementById('badge'); b.textContent=n; b.classList.toggle('on',n>0);
+  document.getElementById('ftot').textContent=`฿${t.toLocaleString()}`;
+  document.getElementById('fcart').style.display=n>0?'flex':'none';
+}
+
+function renderCart() {
+  const e=Object.entries(cart);
+  if(!e.length){document.getElementById('cbody').innerHTML='<div class="cempty">🛒<br><br>ยังไม่มีสินค้าในตะกร้า</div>';document.getElementById('cftr').style.display='none';return;}
+  document.getElementById('cbody').innerHTML=e.map(([id,q])=>{
+    const m=menu.find(m=>m.id===+id);if(!m)return'';
+    return`<div class="citem"><div class="ciem">${m.emoji}</div><div class="cifo"><div class="cinm">${m.name}</div><div class="cipr">฿${m.price}×${q}</div></div><div class="cictl"><button class="cqbtn" onclick="chgQty(${m.id},-1)">−</button><span class="ciqty">${q}</span><button class="cqbtn" onclick="chgQty(${m.id},1)">+</button></div><div class="cisub">฿${(m.price*q).toLocaleString()}</div></div>`;
+  }).join('');
+  document.getElementById('cftr').style.display='block';
+  document.getElementById('ctot').textContent=`฿${getTotal().toLocaleString()}`;
+}
+
+function openCart(){renderCart();document.getElementById('cpanel').classList.add('open');document.getElementById('overlay').classList.add('on');document.body.style.overflow='hidden';}
+function closeCart(){document.getElementById('cpanel').classList.remove('open');document.getElementById('overlay').classList.remove('on');document.body.style.overflow='';}
+
+function openOrder(){
+  if(!getCount())return; closeCart();
+  document.getElementById('osumItems').innerHTML=Object.entries(cart).map(([id,q])=>{const m=menu.find(m=>m.id===+id);if(!m)return'';return`<div class="osi"><span>${m.emoji} ${m.name} ×${q}</span><span>฿${(m.price*q).toLocaleString()}</span></div>`;}).join('');
+  document.getElementById('osumTot').textContent=`฿${getTotal().toLocaleString()}`;
+  document.getElementById('omodal').classList.add('on'); document.body.style.overflow='hidden';
+}
+function closeOrder(){document.getElementById('omodal').classList.remove('on');document.body.style.overflow='';}
+
+function submitOrder(){
+  const name=document.getElementById('iname').value.trim();
+  const phone=document.getElementById('iphone').value.trim();
+  const addr=document.getElementById('iaddr').value.trim();
+  const note=document.getElementById('inote').value.trim();
+  document.querySelectorAll('.fi').forEach(el=>el.classList.remove('err'));
+  if(!name){toast('กรุณากรอกชื่อ-นามสกุล');document.getElementById('iname').classList.add('err');return;}
+  if(!phone){toast('กรุณากรอกเบอร์โทรศัพท์');document.getElementById('iphone').classList.add('err');return;}
+  if(!/^\d{9,10}$/.test(phone)){toast('เบอร์โทรต้องเป็นตัวเลข 9-10 หลัก');document.getElementById('iphone').classList.add('err');return;}
+
+  const orders=getOrders();
+  const items=Object.entries(cart).map(([id,q])=>{const m=menu.find(m=>m.id===+id);return{menuId:+id,name:m.name,emoji:m.emoji,price:m.price,qty:q};});
+  const total=items.reduce((s,i)=>s+i.price*i.qty,0);
+  const order={id:Date.now(),orderNumber:`INF${String(orders.length+1).padStart(4,'0')}`,customerName:name,phone,address:addr,items,total,note,status:'pending',orderedAt:new Date().toISOString()};
+  orders.push(order);
+  saveOrders(orders);
+
+  closeOrder();
+  document.getElementById('sonumber').textContent=order.orderNumber;
+  document.getElementById('smodal').classList.add('on');
+  cart={}; upd(); renderGrid();
+  ['iname','iphone','iaddr','inote'].forEach(id=>{document.getElementById(id).value='';});
+}
+function closeSuc(){document.getElementById('smodal').classList.remove('on');document.body.style.overflow='';}
+
+let tt;
+function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>el.classList.remove('on'),2500);}
+
+load();
+</script>
+</body>
+</html>

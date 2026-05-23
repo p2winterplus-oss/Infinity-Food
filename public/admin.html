@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin — Infinity Frozen Food</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --primary: #5B21B6;
+      --primary-light: #7C3AED;
+      --ice: #0EA5E9;
+      --bg: #F5F3FF;
+      --sidebar: #1E1B4B;
+      --card: #FFFFFF;
+      --text: #1E293B;
+      --text-muted: #64748B;
+      --border: #E2E8F0;
+      --success: #059669;
+      --danger: #DC2626;
+      --warning: #D97706;
+      --info: #0284C7;
+      --radius: 12px;
+    }
+    body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg); color: var(--text); }
+
+    /* LOGIN */
+    .login-screen {
+      min-height: 100vh; display: flex; align-items: center; justify-content: center;
+      background: linear-gradient(135deg, #1E1B4B, #4C1D95, #0C4A6E);
+      padding: 20px;
+    }
+    .login-box {
+      background: white; border-radius: 24px; padding: 48px 40px; width: 100%; max-width: 400px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3); text-align: center;
+    }
+    .login-logo { font-size: 48px; margin-bottom: 8px; }
+    .login-box h1 { font-size: 26px; font-weight: 800; color: var(--primary); letter-spacing: 2px; }
+    .login-box p { color: var(--text-muted); margin: 4px 0 32px; font-size: 14px; }
+    .login-input {
+      width: 100%; padding: 13px 16px; border: 2px solid var(--border);
+      border-radius: 12px; font-size: 16px; font-family: inherit;
+      transition: border-color 0.2s; margin-bottom: 16px; text-align: center;
+      letter-spacing: 4px;
+    }
+    .login-input:focus { outline: none; border-color: var(--primary-light); }
+    .login-btn {
+      width: 100%; padding: 13px; border: none; border-radius: 12px;
+      background: linear-gradient(135deg, var(--primary), var(--ice));
+      color: white; font-size: 16px; font-weight: 700; cursor: pointer;
+      font-family: inherit; transition: all 0.2s;
+    }
+    .login-btn:hover { transform: scale(1.02); box-shadow: 0 4px 20px rgba(91,33,182,0.4); }
+    .login-err { color: var(--danger); font-size: 13px; margin-top: 10px; min-height: 18px; }
+
+    /* DASHBOARD LAYOUT */
+    .dashboard { display: none; min-height: 100vh; }
+    .dashboard.show { display: flex; }
+
+    /* SIDEBAR */
+    .sidebar {
+      width: 240px; min-height: 100vh; background: var(--sidebar); color: white;
+      display: flex; flex-direction: column; position: fixed; top: 0; left: 0; bottom: 0; z-index: 50;
+    }
+    .sidebar-brand { padding: 24px 20px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .sidebar-brand .brand-icon { font-size: 28px; margin-bottom: 4px; }
+    .sidebar-brand h2 { font-size: 18px; font-weight: 800; letter-spacing: 2px; }
+    .sidebar-brand p { font-size: 11px; opacity: 0.6; }
+    .sidebar-nav { flex: 1; padding: 16px 0; }
+    .nav-item {
+      display: flex; align-items: center; gap: 12px; padding: 12px 20px;
+      color: rgba(255,255,255,0.7); cursor: pointer; transition: all 0.2s;
+      font-size: 14px; font-weight: 500; border-left: 3px solid transparent;
+    }
+    .nav-item:hover { background: rgba(255,255,255,0.08); color: white; }
+    .nav-item.active { background: rgba(255,255,255,0.12); color: white; border-left-color: #38BDF8; }
+    .nav-icon { font-size: 18px; width: 22px; text-align: center; }
+    .sidebar-footer { padding: 16px 20px; border-top: 1px solid rgba(255,255,255,0.1); }
+    .logout-btn {
+      display: flex; align-items: center; gap: 10px; color: rgba(255,255,255,0.6);
+      cursor: pointer; font-size: 14px; font-family: inherit; background: none; border: none;
+      padding: 8px 0; width: 100%; transition: color 0.2s;
+    }
+    .logout-btn:hover { color: #F87171; }
+
+    /* MAIN CONTENT */
+    .main { margin-left: 240px; padding: 28px; min-height: 100vh; }
+    .page-header { margin-bottom: 28px; }
+    .page-title { font-size: 24px; font-weight: 800; color: var(--text); }
+    .page-sub { color: var(--text-muted); font-size: 14px; margin-top: 4px; }
+
+    /* STATS CARDS */
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin-bottom: 28px; }
+    .stat-card {
+      background: white; border-radius: var(--radius); padding: 20px;
+      border: 1px solid var(--border); box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    .stat-icon { font-size: 28px; margin-bottom: 10px; }
+    .stat-label { font-size: 12px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+    .stat-value { font-size: 28px; font-weight: 800; color: var(--text); margin-top: 4px; }
+    .stat-value.primary { color: var(--primary); }
+    .stat-value.success { color: var(--success); }
+    .stat-value.warning { color: var(--warning); }
+    .stat-value.info { color: var(--info); }
+
+    /* SECTION */
+    .section { display: none; }
+    .section.active { display: block; }
+
+    /* CARD */
+    .card { background: white; border-radius: var(--radius); border: 1px solid var(--border); box-shadow: 0 2px 8px rgba(0,0,0,0.05); overflow: hidden; }
+    .card-head { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .card-head h3 { font-size: 16px; font-weight: 700; }
+
+    /* TOOLBAR */
+    .toolbar { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+    .search-box {
+      padding: 8px 14px; border: 1px solid var(--border); border-radius: 8px;
+      font-size: 14px; font-family: inherit; min-width: 200px;
+    }
+    .search-box:focus { outline: none; border-color: var(--primary-light); }
+    .filter-select {
+      padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px;
+      font-size: 14px; font-family: inherit; background: white;
+    }
+
+    /* BUTTONS */
+    .btn {
+      padding: 8px 16px; border-radius: 8px; font-size: 14px; font-weight: 600;
+      cursor: pointer; border: none; font-family: inherit; transition: all 0.2s;
+      display: inline-flex; align-items: center; gap: 6px;
+    }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { background: var(--primary-light); }
+    .btn-success { background: var(--success); color: white; }
+    .btn-success:hover { background: #047857; }
+    .btn-danger { background: var(--danger); color: white; }
+    .btn-danger:hover { background: #B91C1C; }
+    .btn-outline { background: white; color: var(--text); border: 1px solid var(--border); }
+    .btn-outline:hover { border-color: var(--primary); color: var(--primary); }
+    .btn-sm { padding: 5px 10px; font-size: 12px; }
+    .btn-icon { padding: 6px 8px; }
+
+    /* TABLE */
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th { background: #F8FAFC; padding: 12px 14px; text-align: left; font-weight: 600; font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+    td { padding: 12px 14px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #FAFAFF; }
+
+    /* BADGE */
+    .badge { padding: 4px 10px; border-radius: 50px; font-size: 12px; font-weight: 600; display: inline-block; }
+    .badge-green { background: #D1FAE5; color: #065F46; }
+    .badge-red { background: #FEE2E2; color: #991B1B; }
+    .badge-yellow { background: #FEF3C7; color: #92400E; }
+    .badge-blue { background: #DBEAFE; color: #1E40AF; }
+    .badge-gray { background: #F3F4F6; color: #374151; }
+    .badge-purple { background: #EDE9FE; color: #5B21B6; }
+
+    /* MODAL */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 200; display: none; align-items: center; justify-content: center; padding: 20px; }
+    .modal-overlay.show { display: flex; }
+    .modal-box { background: white; border-radius: 20px; width: 100%; max-width: 500px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.3); max-height: 90vh; overflow-y: auto; }
+    .modal-head { padding: 20px 24px; background: linear-gradient(135deg,#1E1B4B,#4C1D95); color: white; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; }
+    .modal-head h2 { font-size: 17px; font-weight: 700; }
+    .modal-close { background: none; border: none; color: white; font-size: 22px; cursor: pointer; }
+    .modal-body { padding: 24px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .form-group { margin-bottom: 16px; }
+    .form-label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+    .form-input {
+      width: 100%; padding: 10px 13px; border: 2px solid var(--border);
+      border-radius: 10px; font-size: 14px; font-family: inherit;
+      transition: border-color 0.2s; color: var(--text); resize: vertical;
+    }
+    .form-input:focus { outline: none; border-color: var(--primary-light); }
+    .form-check { display: flex; align-items: center; gap: 8px; font-size: 14px; }
+    .form-check input { width: 16px; height: 16px; cursor: pointer; accent-color: var(--primary); }
+    .modal-footer { padding: 16px 24px; border-top: 1px solid var(--border); display: flex; gap: 10px; justify-content: flex-end; }
+
+    /* EMOJI PICKER */
+    .emoji-grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 4px; margin-bottom: 10px; }
+    .emoji-opt {
+      font-size: 22px; padding: 6px; border-radius: 8px; cursor: pointer;
+      text-align: center; border: 2px solid transparent; transition: all 0.15s;
+    }
+    .emoji-opt:hover { background: var(--bg); }
+    .emoji-opt.selected { border-color: var(--primary); background: #EDE9FE; }
+
+    /* ORDER DETAIL */
+    .order-items-list { background: var(--bg); border-radius: 10px; padding: 12px; margin: 12px 0; }
+    .order-item-row { display: flex; justify-content: space-between; padding: 4px 0; font-size: 14px; }
+    .order-total-row { display: flex; justify-content: space-between; font-weight: 800; font-size: 16px; color: var(--primary); padding-top: 10px; margin-top: 6px; border-top: 1px solid var(--border); }
+    .info-row { display: flex; gap: 8px; margin-bottom: 8px; font-size: 14px; }
+    .info-label { font-weight: 600; color: var(--text-muted); min-width: 80px; }
+
+    /* STATUS SELECTOR */
+    .status-select {
+      padding: 5px 10px; border: 1px solid var(--border); border-radius: 6px;
+      font-size: 13px; font-family: inherit; background: white; cursor: pointer;
+    }
+
+    /* TOAST */
+    .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(80px); background: #1E1B4B; color: white; padding: 12px 24px; border-radius: 50px; font-size: 14px; font-weight: 600; z-index: 999; transition: transform 0.3s ease; box-shadow: 0 4px 20px rgba(0,0,0,0.3); white-space: nowrap; }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+
+    /* EMPTY */
+    .table-empty { text-align: center; padding: 60px 20px; color: var(--text-muted); }
+    .table-empty-icon { font-size: 48px; margin-bottom: 12px; }
+
+    /* MENU TOGGLE */
+    .toggle-switch { position: relative; width: 44px; height: 24px; display: inline-block; }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider { position: absolute; inset: 0; background: #D1D5DB; border-radius: 24px; cursor: pointer; transition: 0.2s; }
+    .toggle-slider:before { content: ''; position: absolute; height: 18px; width: 18px; left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: 0.2s; }
+    input:checked + .toggle-slider { background: var(--success); }
+    input:checked + .toggle-slider:before { transform: translateX(20px); }
+
+    @media (max-width: 768px) {
+      .sidebar { width: 60px; }
+      .nav-label, .sidebar-brand p, .sidebar-brand h2, .logout-label { display: none; }
+      .sidebar-brand { padding: 16px 10px; }
+      .nav-item { padding: 12px; justify-content: center; }
+      .nav-icon { width: auto; }
+      .logout-btn { justify-content: center; }
+      .main { margin-left: 60px; padding: 16px; }
+      .form-row { grid-template-columns: 1fr; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">∞</div>
+    <h1>INFINITY</h1>
+    <p>ระบบจัดการร้านอาหารแช่แข็ง</p>
+    <input class="login-input" type="password" id="pwdInput" placeholder="รหัสผ่าน Admin" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="login-btn" onclick="doLogin()">🔐 เข้าสู่ระบบ</button>
+    <div class="login-err" id="loginErr"></div>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div class="dashboard" id="dashboard">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-icon">∞</div>
+      <h2>INFINITY</h2>
+      <p class="nav-label">FROZEN FOOD</p>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-item active" onclick="showSection('dashboard')">
+        <span class="nav-icon">📊</span><span class="nav-label">ภาพรวม</span>
+      </div>
+      <div class="nav-item" onclick="showSection('menu')">
+        <span class="nav-icon">🍱</span><span class="nav-label">จัดการเมนู</span>
+      </div>
+      <div class="nav-item" onclick="showSection('orders')">
+        <span class="nav-icon">📦</span><span class="nav-label">ออเดอร์</span>
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <button class="logout-btn" onclick="doLogout()">
+        <span>🚪</span><span class="logout-label nav-label">ออกจากระบบ</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- DASHBOARD SECTION -->
+    <div class="section active" id="section-dashboard">
+      <div class="page-header">
+        <div class="page-title">📊 ภาพรวม</div>
+        <div class="page-sub" id="dashDate"></div>
+      </div>
+      <div class="stats-grid" id="statsGrid">
+        <div class="stat-card"><div class="stat-icon">📦</div><div class="stat-label">ออเดอร์วันนี้</div><div class="stat-value primary" id="st-today">—</div></div>
+        <div class="stat-card"><div class="stat-icon">💰</div><div class="stat-label">รายได้วันนี้</div><div class="stat-value success" id="st-revenue-today">—</div></div>
+        <div class="stat-card"><div class="stat-icon">⏳</div><div class="stat-label">รอยืนยัน</div><div class="stat-value warning" id="st-pending">—</div></div>
+        <div class="stat-card"><div class="stat-icon">🍱</div><div class="stat-label">เมนูพร้อมขาย</div><div class="stat-value info" id="st-menu">—</div></div>
+        <div class="stat-card"><div class="stat-icon">📈</div><div class="stat-label">ออเดอร์ทั้งหมด</div><div class="stat-value" id="st-total">—</div></div>
+        <div class="stat-card"><div class="stat-icon">💵</div><div class="stat-label">รายได้ทั้งหมด</div><div class="stat-value success" id="st-revenue">—</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <h3>📦 ออเดอร์ล่าสุด</h3>
+          <button class="btn btn-outline btn-sm" onclick="showSection('orders')">ดูทั้งหมด →</button>
+        </div>
+        <div class="table-wrap">
+          <table id="recentOrdersTable">
+            <thead><tr><th>เลขออเดอร์</th><th>ลูกค้า</th><th>ยอด</th><th>สถานะ</th><th>เวลา</th></tr></thead>
+            <tbody id="recentOrdersBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- MENU SECTION -->
+    <div class="section" id="section-menu">
+      <div class="page-header">
+        <div class="page-title">🍱 จัดการเมนู</div>
+        <div class="page-sub">เพิ่ม แก้ไข และอัพเดทราคาเมนูอาหารแช่แข็ง</div>
+      </div>
+      <div class="card">
+        <div class="card-head">
+          <h3>รายการเมนูทั้งหมด</h3>
+          <div class="toolbar">
+            <input class="search-box" placeholder="🔍 ค้นหาเมนู..." oninput="filterMenu(this.value)">
+            <button class="btn btn-primary" onclick="openMenuModal()">＋ เพิ่มเมนู</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th></th><th>ชื่อเมนู</th><th>หมวด</th><th>ราคา</th><th>รายละเอียด</th><th>สถานะ</th><th>อัพเดทล่าสุด</th><th>จัดการ</th></tr></thead>
+            <tbody id="menuBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ORDERS SECTION -->
+    <div class="section" id="section-orders">
+      <div class="page-header">
+        <div class="page-title">📦 รายการออเดอร์</div>
+        <div class="page-sub">จัดการและติดตามสถานะคำสั่งซื้อ</div>
+      </div>
+      <div class="card">
+        <div class="card-head">
+          <h3>ออเดอร์ทั้งหมด</h3>
+          <div class="toolbar">
+            <input class="search-box" placeholder="🔍 ค้นหาชื่อ/เบอร์/เลขออเดอร์..." oninput="searchOrders(this.value)">
+            <select class="filter-select" id="statusFilter" onchange="filterOrders()">
+              <option value="all">สถานะทั้งหมด</option>
+              <option value="pending">รอยืนยัน</option>
+              <option value="confirmed">ยืนยันแล้ว</option>
+              <option value="preparing">กำลังเตรียม</option>
+              <option value="delivered">ส่งแล้ว</option>
+              <option value="cancelled">ยกเลิก</option>
+            </select>
+            <button class="btn btn-outline btn-sm" onclick="exportOrders()">📥 ดาวน์โหลด CSV</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>เลขออเดอร์</th><th>ลูกค้า</th><th>เบอร์โทร</th><th>รายการ</th><th>ยอดรวม</th><th>สถานะ</th><th>วันที่</th><th>จัดการ</th></tr></thead>
+            <tbody id="ordersBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ADD/EDIT MENU MODAL -->
+<div class="modal-overlay" id="menuModal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h2 id="menuModalTitle">เพิ่มเมนูใหม่</h2>
+      <button class="modal-close" onclick="closeMenuModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="margin-bottom:16px">
+        <div class="form-label">เลือก Emoji</div>
+        <div class="emoji-grid" id="emojiGrid"></div>
+        <input class="form-input" id="menuEmoji" placeholder="หรือพิมพ์ emoji เอง" style="margin-top:8px;text-align:center;font-size:20px;letter-spacing:4px">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">ชื่อเมนู *</label>
+          <input class="form-input" id="menuName" placeholder="เช่น ข้าวผัดกะเพรา">
+        </div>
+        <div class="form-group">
+          <label class="form-label">หมวดหมู่ *</label>
+          <input class="form-input" id="menuCategory" placeholder="เช่น ข้าวผัด, เส้น, แกง">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">ราคา (บาท) *</label>
+        <input class="form-input" id="menuPrice" type="number" min="0" placeholder="เช่น 45">
+      </div>
+      <div class="form-group">
+        <label class="form-label">รายละเอียด</label>
+        <textarea class="form-input" id="menuDesc" rows="2" placeholder="อธิบายเมนูสั้นๆ"></textarea>
+      </div>
+      <div class="form-check">
+        <input type="checkbox" id="menuAvailable" checked>
+        <label for="menuAvailable">พร้อมขาย (แสดงในหน้าร้าน)</label>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeMenuModal()">ยกเลิก</button>
+      <button class="btn btn-primary" onclick="saveMenu()">💾 บันทึก</button>
+    </div>
+  </div>
+</div>
+
+<!-- ORDER DETAIL MODAL -->
+<div class="modal-overlay" id="orderModal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h2 id="orderModalTitle">รายละเอียดออเดอร์</h2>
+      <button class="modal-close" onclick="closeOrderModal()">✕</button>
+    </div>
+    <div class="modal-body" id="orderModalBody"></div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeOrderModal()">ปิด</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const EMOJIS = ['🍱','🍚','🍗','🍖','🥩','🍜','🍝','🍛','🍲','🥘','🫕','🥗','🥞','🧆','🌮','🌯','🥙','🥚','🍳','🥓','🫔','🍤','🦐','🦞','🦀','🐟','🥦','🌽','🧅','🥕'];
+
+  let adminPwd = '';
+  let menuData = [], ordersData = [];
+  let editMenuId = null;
+  let orderSearch = '', orderStatus = 'all';
+
+  // AUTH
+  async function doLogin() {
+    const pwd = document.getElementById('pwdInput').value;
+    const err = document.getElementById('loginErr');
+    try {
+      const res = await fetch('/api/admin/login', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({password:pwd}) });
+      const data = await res.json();
+      if (!data.success) { err.textContent = '❌ รหัสผ่านไม่ถูกต้อง'; return; }
+      adminPwd = pwd;
+      sessionStorage.setItem('adminPwd', pwd);
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('dashboard').classList.add('show');
+      loadDashboard();
+    } catch { err.textContent = 'เกิดข้อผิดพลาด กรุณาลองใหม่'; }
+  }
+
+  function doLogout() {
+    adminPwd = '';
+    sessionStorage.removeItem('adminPwd');
+    document.getElementById('dashboard').classList.remove('show');
+    document.getElementById('loginScreen').style.display = 'flex';
+    document.getElementById('pwdInput').value = '';
+    document.getElementById('loginErr').textContent = '';
+  }
+
+  function headers() { return { 'Content-Type':'application/json', 'X-Admin-Password': adminPwd }; }
+
+  // NAVIGATION
+  function showSection(name) {
+    document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+    document.getElementById('section-'+name).classList.add('active');
+    document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+    document.querySelectorAll('.nav-item')[['dashboard','menu','orders'].indexOf(name)].classList.add('active');
+    if (name==='dashboard') loadDashboard();
+    else if (name==='menu') loadMenu();
+    else if (name==='orders') loadOrders();
+  }
+
+  // DASHBOARD
+  async function loadDashboard() {
+    const d = new Date();
+    const days=['อาทิตย์','จันทร์','อังคาร','พุธ','พฤหัส','ศุกร์','เสาร์'];
+    const months=['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+    document.getElementById('dashDate').textContent = `วัน${days[d.getDay()]}ที่ ${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()+543}`;
+
+    try {
+      const [statsRes, ordersRes] = await Promise.all([
+        fetch('/api/stats', {headers: headers()}),
+        fetch('/api/orders?status=all', {headers: headers()})
+      ]);
+      const stats = await statsRes.json();
+      const orders = await ordersRes.json();
+
+      document.getElementById('st-today').textContent = stats.todayOrders;
+      document.getElementById('st-revenue-today').textContent = `฿${stats.todayRevenue.toLocaleString()}`;
+      document.getElementById('st-pending').textContent = stats.pendingOrders;
+      document.getElementById('st-menu').textContent = `${stats.availableMenu}/${stats.menuCount}`;
+      document.getElementById('st-total').textContent = stats.totalOrders;
+      document.getElementById('st-revenue').textContent = `฿${stats.totalRevenue.toLocaleString()}`;
+
+      const recent = orders.slice(0,8);
+      document.getElementById('recentOrdersBody').innerHTML = recent.length ? recent.map(o => `
+        <tr>
+          <td><strong>${o.orderNumber}</strong></td>
+          <td>${o.customerName}</td>
+          <td style="font-weight:700;color:var(--primary)">฿${o.total.toLocaleString()}</td>
+          <td>${statusBadge(o.status)}</td>
+          <td style="color:var(--text-muted);font-size:13px">${timeAgo(o.orderedAt)}</td>
+        </tr>`).join('') : '<tr><td colspan="5" class="table-empty"><div class="table-empty-icon">📦</div><p>ยังไม่มีออเดอร์</p></td></tr>';
+    } catch(e) { console.error(e); }
+  }
+
+  // MENU
+  async function loadMenu() {
+    try {
+      const res = await fetch('/api/menu');
+      menuData = await res.json();
+      renderMenu(menuData);
+    } catch { showToast('โหลดเมนูไม่สำเร็จ'); }
+  }
+
+  function filterMenu(q) {
+    const filtered = menuData.filter(m => m.name.toLowerCase().includes(q.toLowerCase()) || m.category.includes(q));
+    renderMenu(filtered);
+  }
+
+  function renderMenu(data) {
+    if (!data.length) {
+      document.getElementById('menuBody').innerHTML = '<tr><td colspan="8"><div class="table-empty"><div class="table-empty-icon">🍱</div><p>ไม่พบเมนู</p></div></td></tr>';
+      return;
+    }
+    document.getElementById('menuBody').innerHTML = data.map(m => `
+      <tr>
+        <td style="font-size:24px;text-align:center">${m.emoji}</td>
+        <td><strong>${m.name}</strong></td>
+        <td><span class="badge badge-purple">${m.category}</span></td>
+        <td><strong style="color:var(--primary);font-size:16px">฿${m.price.toLocaleString()}</strong></td>
+        <td style="color:var(--text-muted);font-size:13px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${m.description||'—'}</td>
+        <td>
+          <label class="toggle-switch" title="${m.available?'พร้อมขาย':'ไม่พร้อมขาย'}">
+            <input type="checkbox" ${m.available?'checked':''} onchange="toggleAvailable(${m.id},this.checked)">
+            <span class="toggle-slider"></span>
+          </label>
+        </td>
+        <td style="font-size:12px;color:var(--text-muted)">${formatDate(m.updatedAt)}</td>
+        <td>
+          <div style="display:flex;gap:6px">
+            <button class="btn btn-outline btn-sm btn-icon" onclick="openMenuModal(${m.id})" title="แก้ไข">✏️</button>
+            <button class="btn btn-danger btn-sm btn-icon" onclick="deleteMenu(${m.id},'${m.name}')" title="ลบ">🗑️</button>
+          </div>
+        </td>
+      </tr>`).join('');
+  }
+
+  function openMenuModal(id) {
+    editMenuId = id || null;
+    document.getElementById('menuModalTitle').textContent = id ? '✏️ แก้ไขเมนู' : '➕ เพิ่มเมนูใหม่';
+    const emojis = EMOJIS;
+    document.getElementById('emojiGrid').innerHTML = emojis.map(e =>
+      `<div class="emoji-opt" onclick="selectEmoji('${e}')">${e}</div>`
+    ).join('');
+
+    if (id) {
+      const m = menuData.find(m=>m.id===id);
+      document.getElementById('menuEmoji').value = m.emoji;
+      document.getElementById('menuName').value = m.name;
+      document.getElementById('menuCategory').value = m.category;
+      document.getElementById('menuPrice').value = m.price;
+      document.getElementById('menuDesc').value = m.description||'';
+      document.getElementById('menuAvailable').checked = m.available;
+      document.querySelectorAll('.emoji-opt').forEach(el => {
+        el.classList.toggle('selected', el.textContent===m.emoji);
+      });
+    } else {
+      ['menuEmoji','menuName','menuCategory','menuPrice','menuDesc'].forEach(id=>{ document.getElementById(id).value=''; });
+      document.getElementById('menuEmoji').value = '🍱';
+      document.getElementById('menuAvailable').checked = true;
+      document.querySelectorAll('.emoji-opt').forEach(el=>el.classList.remove('selected'));
+    }
+    document.getElementById('menuModal').classList.add('show');
+  }
+
+  function selectEmoji(e) {
+    document.getElementById('menuEmoji').value = e;
+    document.querySelectorAll('.emoji-opt').forEach(el => el.classList.toggle('selected', el.textContent===e));
+  }
+
+  function closeMenuModal() { document.getElementById('menuModal').classList.remove('show'); }
+
+  async function saveMenu() {
+    const emoji = document.getElementById('menuEmoji').value || '🍱';
+    const name = document.getElementById('menuName').value.trim();
+    const category = document.getElementById('menuCategory').value.trim();
+    const price = document.getElementById('menuPrice').value;
+    const description = document.getElementById('menuDesc').value.trim();
+    const available = document.getElementById('menuAvailable').checked;
+
+    if (!name || !price) { showToast('กรุณากรอกชื่อและราคา'); return; }
+
+    const body = { emoji, name, category, price: Number(price), description, available };
+    const url = editMenuId ? `/api/menu/${editMenuId}` : '/api/menu';
+    const method = editMenuId ? 'PUT' : 'POST';
+
+    try {
+      const res = await fetch(url, { method, headers: headers(), body: JSON.stringify(body) });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.message);
+      closeMenuModal();
+      showToast(editMenuId ? '✅ อัพเดทเมนูสำเร็จ' : '✅ เพิ่มเมนูสำเร็จ');
+      loadMenu();
+    } catch(e) { showToast(e.message||'เกิดข้อผิดพลาด'); }
+  }
+
+  async function toggleAvailable(id, val) {
+    try {
+      await fetch(`/api/menu/${id}`, { method:'PUT', headers: headers(), body: JSON.stringify({available:val}) });
+      const m = menuData.find(m=>m.id===id); if(m) m.available=val;
+      showToast(val ? '✅ เปิดขายแล้ว' : '⛔ ปิดขายแล้ว');
+    } catch { showToast('เกิดข้อผิดพลาด'); loadMenu(); }
+  }
+
+  async function deleteMenu(id, name) {
+    if (!confirm(`ยืนยันลบเมนู "${name}"?`)) return;
+    try {
+      const res = await fetch(`/api/menu/${id}`, { method:'DELETE', headers: headers() });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.message);
+      showToast('🗑️ ลบเมนูสำเร็จ');
+      loadMenu();
+    } catch(e) { showToast(e.message||'เกิดข้อผิดพลาด'); }
+  }
+
+  // ORDERS
+  async function loadOrders() {
+    try {
+      const params = new URLSearchParams({ status: orderStatus });
+      if (orderSearch) params.append('search', orderSearch);
+      const res = await fetch(`/api/orders?${params}`, {headers: headers()});
+      ordersData = await res.json();
+      renderOrders(ordersData);
+    } catch { showToast('โหลดออเดอร์ไม่สำเร็จ'); }
+  }
+
+  function searchOrders(q) { orderSearch = q; loadOrders(); }
+  function filterOrders() { orderStatus = document.getElementById('statusFilter').value; loadOrders(); }
+
+  function renderOrders(data) {
+    if (!data.length) {
+      document.getElementById('ordersBody').innerHTML = '<tr><td colspan="8"><div class="table-empty"><div class="table-empty-icon">📦</div><p>ไม่พบออเดอร์</p></div></td></tr>';
+      return;
+    }
+    document.getElementById('ordersBody').innerHTML = data.map(o => {
+      const itemSummary = o.items.map(i=>`${i.emoji||''}${i.name}×${i.qty}`).join(', ');
+      return `<tr>
+        <td><strong>${o.orderNumber}</strong><br><span style="font-size:11px;color:var(--text-muted)">${formatDate(o.orderedAt)}</span></td>
+        <td><strong>${o.customerName}</strong><br><span style="font-size:12px;color:var(--text-muted)">${o.phone}</span></td>
+        <td style="font-size:13px">${o.phone}</td>
+        <td style="font-size:13px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${itemSummary}">${itemSummary}</td>
+        <td><strong style="color:var(--primary)">฿${o.total.toLocaleString()}</strong></td>
+        <td>
+          <select class="status-select" onchange="updateStatus(${o.id},this.value)" style="border-color:${statusColor(o.status)}">
+            <option value="pending"   ${o.status==='pending'?'selected':''}>⏳ รอยืนยัน</option>
+            <option value="confirmed" ${o.status==='confirmed'?'selected':''}>✅ ยืนยันแล้ว</option>
+            <option value="preparing" ${o.status==='preparing'?'selected':''}>👨‍🍳 กำลังเตรียม</option>
+            <option value="delivered" ${o.status==='delivered'?'selected':''}>🚀 ส่งแล้ว</option>
+            <option value="cancelled" ${o.status==='cancelled'?'selected':''}>❌ ยกเลิก</option>
+          </select>
+        </td>
+        <td style="font-size:12px;color:var(--text-muted)">${timeAgo(o.orderedAt)}</td>
+        <td>
+          <div style="display:flex;gap:6px">
+            <button class="btn btn-outline btn-sm btn-icon" onclick="viewOrder(${o.id})" title="รายละเอียด">👁️</button>
+            <button class="btn btn-danger btn-sm btn-icon" onclick="deleteOrder(${o.id},'${o.orderNumber}')" title="ลบ">🗑️</button>
+          </div>
+        </td>
+      </tr>`;
+    }).join('');
+  }
+
+  async function updateStatus(id, status) {
+    try {
+      const res = await fetch(`/api/orders/${id}/status`, { method:'PUT', headers: headers(), body: JSON.stringify({status}) });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.message);
+      const statusTH = {pending:'รอยืนยัน',confirmed:'ยืนยันแล้ว',preparing:'กำลังเตรียม',delivered:'ส่งแล้ว',cancelled:'ยกเลิก'};
+      showToast(`✅ อัพเดทสถานะเป็น "${statusTH[status]}"`);
+    } catch(e) { showToast(e.message||'เกิดข้อผิดพลาด'); loadOrders(); }
+  }
+
+  function viewOrder(id) {
+    const o = ordersData.find(o=>o.id===id); if(!o) return;
+    document.getElementById('orderModalTitle').textContent = `📦 ${o.orderNumber}`;
+    document.getElementById('orderModalBody').innerHTML = `
+      <div class="info-row"><span class="info-label">ลูกค้า</span><span>${o.customerName}</span></div>
+      <div class="info-row"><span class="info-label">เบอร์โทร</span><span>${o.phone}</span></div>
+      <div class="info-row"><span class="info-label">ที่อยู่</span><span>${o.address||'—'}</span></div>
+      <div class="info-row"><span class="info-label">หมายเหตุ</span><span>${o.note||'—'}</span></div>
+      <div class="info-row"><span class="info-label">สถานะ</span><span>${statusBadge(o.status)}</span></div>
+      <div class="info-row"><span class="info-label">วันที่สั่ง</span><span>${new Date(o.orderedAt).toLocaleString('th-TH')}</span></div>
+      <div class="order-items-list">
+        ${o.items.map(i=>`<div class="order-item-row"><span>${i.emoji||''}${i.name} ×${i.qty}</span><span>฿${(i.price*i.qty).toLocaleString()}</span></div>`).join('')}
+        <div class="order-total-row"><span>ยอดรวม</span><span>฿${o.total.toLocaleString()}</span></div>
+      </div>`;
+    document.getElementById('orderModal').classList.add('show');
+  }
+
+  function closeOrderModal() { document.getElementById('orderModal').classList.remove('show'); }
+
+  async function deleteOrder(id, num) {
+    if (!confirm(`ยืนยันลบออเดอร์ ${num}?`)) return;
+    try {
+      const res = await fetch(`/api/orders/${id}`, { method:'DELETE', headers: headers() });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.message);
+      showToast('🗑️ ลบออเดอร์สำเร็จ');
+      loadOrders();
+    } catch(e) { showToast(e.message||'เกิดข้อผิดพลาด'); }
+  }
+
+  function exportOrders() {
+    window.open(`/api/export/orders?t=${Date.now()}`, '_blank');
+  }
+
+  // HELPERS
+  function statusBadge(s) {
+    const map = {pending:'badge-yellow',confirmed:'badge-blue',preparing:'badge-purple',delivered:'badge-green',cancelled:'badge-red'};
+    const label = {pending:'⏳ รอยืนยัน',confirmed:'✅ ยืนยันแล้ว',preparing:'👨‍🍳 เตรียมอาหาร',delivered:'🚀 ส่งแล้ว',cancelled:'❌ ยกเลิก'};
+    return `<span class="badge ${map[s]||'badge-gray'}">${label[s]||s}</span>`;
+  }
+  function statusColor(s) { return {pending:'#D97706',confirmed:'#1D4ED8',preparing:'#5B21B6',delivered:'#059669',cancelled:'#DC2626'}[s]||'#D1D5DB'; }
+  function formatDate(iso) { return iso ? new Date(iso).toLocaleString('th-TH',{day:'numeric',month:'short',year:'2-digit',hour:'2-digit',minute:'2-digit'}) : '—'; }
+  function timeAgo(iso) {
+    const diff = (Date.now()-new Date(iso).getTime())/1000;
+    if(diff<60) return 'เพิ่งสั่ง';
+    if(diff<3600) return `${Math.floor(diff/60)} นาทีที่แล้ว`;
+    if(diff<86400) return `${Math.floor(diff/3600)} ชั่วโมงที่แล้ว`;
+    return `${Math.floor(diff/86400)} วันที่แล้ว`;
+  }
+
+  let toastTimer;
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.classList.add('show');
+    clearTimeout(toastTimer); toastTimer = setTimeout(()=>t.classList.remove('show'),2500);
+  }
+
+  // AUTO-LOGIN from session
+  const savedPwd = sessionStorage.getItem('adminPwd');
+  if (savedPwd) {
+    document.getElementById('pwdInput').value = savedPwd;
+    doLogin();
+  }
+</script>
+</body>
+</html>
